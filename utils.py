@@ -33,7 +33,7 @@ def create_translation(text_block):
 
 
 def cut_video(input_path, output_path, start_time, end_time=None):
-    if not end_time:
+    if not (end_time is None and end_time == float("nan")):
         commands = [
             "ffmpeg",
             "-y",
@@ -156,14 +156,20 @@ def create_clips_from_deck(deck, deck_number, movie_name):
         )
 
 
+def seconds_to_hms(seconds):
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    secs = seconds % 60
+    return f"{hours:02}:{minutes:02}:{secs:02}"
+
 def create_data_from_deck(deck, deck_number, movie_name):
     return [
         {
             "DeckNo": deck_number + 1,
             "PartNo": i + 1,
             "Order": i + 1,
-            "StartTime": part["duration_start"] - deck[0]["duration_start"],
-            "EndTime": part["duration_end"] - deck[0]["duration_start"],
+            "StartTime": seconds_to_hms(part["duration_start"] - deck[0]["duration_start"]),
+            "EndTime": seconds_to_hms(part["duration_end"] - deck[0]["duration_start"]),
             "SourceLanguage": "EN",
             "TR": "",
             "EN": part["text"].strip(),
@@ -199,10 +205,12 @@ def process_movie(movie_name, data_path):
 
     df["TR"] = translation
 
+    df.to_excel(f"data/out/{movie_name}_final_table.xlsx")
+
     return df
 
-
 if __name__ == "__main__":
-    mp4_to_mp3("Paterson")
-    transcript = get_transcript("Paterson")
-    print(transcript)
+    pass
+    # mp4_to_mp3("Paterson")
+    # transcript = get_transcript("Paterson")
+    # print(transcript)

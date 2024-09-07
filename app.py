@@ -36,3 +36,13 @@ file = st.file_uploader("Choose a file", type="xlsx")
 if st.button("Submit"):
     df = process_movie(movie_name, file)
     st.dataframe(df)
+
+    final_table_path = f"data/out/{movie_name}_final_table.xlsx"
+    
+    with open(final_table_path, "rb") as f:
+        st.download_button(
+            label="Download Data",
+            data=f.read(),
+            file_name=final_table_path.split("/")[-1],
+            mime="application/octet-stream",
+        )
