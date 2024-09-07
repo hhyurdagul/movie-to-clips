@@ -1,11 +1,10 @@
 import os
-import shutil
-import pandas as pd
 import streamlit as st
-from utils import get_transcript, mp4_to_mp3, json_to_dataframe, process_deck
+from utils import get_transcript, mp4_to_mp3, json_to_dataframe, process_movie
 
 
-st.title("Movie Cutter")
+st.set_page_config(page_title="Movie Clipper", page_icon=":movie_camera:")
+st.title("Movie Clipper")
 
 movie_name = st.text_input("Movie Name")
 
@@ -35,15 +34,5 @@ else:
 
 file = st.file_uploader("Choose a file", type="xlsx")
 if st.button("Submit"):
-    records = pd.read_excel(file).to_dict("records")
-    decks = [records[i * 10 : (i + 1) * 10] for i in range(len(records) // 10 + 1)]
-
-    new_decks = []
-    if os.path.exists(f"data/out/{movie_name}"):
-        shutil.rmtree(f"data/out/{movie_name}")
-    os.mkdir(f"data/out/{movie_name}")
-    for i, deck in enumerate(decks):
-        new_deck = process_deck(deck, i, movie_name)
-        new_decks.extend(new_deck)
-
-    st.dataframe(pd.DataFrame(new_decks))
+    df = process_movie(movie_name, file)
+    st.dataframe(df)
