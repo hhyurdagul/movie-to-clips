@@ -183,7 +183,7 @@ def process_movie(movie_name, data_path):
 
     new_decks = []
     for i, deck in enumerate(decks):
-        # create_clips_from_deck(deck, i, movie_name)
+        create_clips_from_deck(deck, i, movie_name)
         new_deck = create_data_from_deck(deck, i, movie_name)
         new_decks.extend(new_deck)
 
