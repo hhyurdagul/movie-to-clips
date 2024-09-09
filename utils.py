@@ -10,6 +10,16 @@ load_dotenv()
 client = OpenAI()
 
 
+def seconds_to_hms(seconds):
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    secs = seconds % 60
+    return f"{hours:02}:{minutes:02}:{secs:02}"
+
+def hms_to_seconds(hms):
+    hours, minutes, seconds = hms.split(":")
+    return int(hours) * 3600 + int(minutes) * 60 + int(seconds)
+
 def create_translation(text_block):
     completion = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -118,10 +128,10 @@ def json_to_dataframe(movie_name):
         [
             {
                 "text": segment["text"].strip(),
-                "start": round(segment["start"], 1),
-                "end": round(segment["end"], 1),
-                "duration_start": round(segment["start"], 1),
-                "duration_end": round(segment["end"], 1),
+                "start": seconds_to_hms(round(segment["start"], 1)),
+                "end": seconds_to_hms(round(segment["end"], 1)),
+                "duration_start": seconds_to_hms(round(segment["start"], 1)),
+                "duration_end": seconds_to_hms(round(segment["end"], 1)),
             }
             for segment in data["segments"]
         ]
@@ -155,13 +165,6 @@ def create_clips_from_deck(deck, deck_number, movie_name):
             end_time=part["end"],
         )
 
-
-def seconds_to_hms(seconds):
-    hours = seconds // 3600
-    minutes = (seconds % 3600) // 60
-    secs = seconds % 60
-    return f"{hours:02}:{minutes:02}:{secs:02}"
-
 def create_data_from_deck(deck, deck_number, movie_name):
     return [
         {
@@ -181,7 +184,13 @@ def create_data_from_deck(deck, deck_number, movie_name):
 
 
 def process_movie(movie_name, data_path):
-    records = pd.read_excel(data_path).to_dict("records")
+    raw_records = pd.read_excel(data_path)
+    raw_records["start"] = raw_records["start"].apply(lambda x: hms_to_seconds(x))
+    raw_records["end"] = raw_records["end"].apply(lambda x: hms_to_seconds(x))
+    raw_records["duration_start"] = raw_records["duration_start"].apply(lambda x: hms_to_seconds(x))
+    raw_records["duration_end"] = raw_records["duration_end"].apply(lambda x: hms_to_seconds(x))
+
+    records = raw_records.to_dict("records")
     decks = [records[i * 10 : (i + 1) * 10] for i in range(len(records) // 10 + 1)]
     if os.path.exists(f"data/out/{movie_name}"):
         shutil.rmtree(f"data/out/{movie_name}")
