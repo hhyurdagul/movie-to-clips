@@ -17,6 +17,8 @@ def seconds_to_hms(seconds):
     return f"{hours:02}:{minutes:02}:{secs:02}"
 
 def hms_to_seconds(hms):
+    if isinstance(hms, float):
+        return float("nan")
     hours, minutes, seconds = hms.split(":")
     return int(hours) * 3600 + int(minutes) * 60 + int(seconds)
 
@@ -128,10 +130,10 @@ def json_to_dataframe(movie_name):
         [
             {
                 "text": segment["text"].strip(),
-                "start": seconds_to_hms(round(segment["start"], 1)),
-                "end": seconds_to_hms(round(segment["end"], 1)),
-                "duration_start": seconds_to_hms(round(segment["start"], 1)),
-                "duration_end": seconds_to_hms(round(segment["end"], 1)),
+                "start": seconds_to_hms(round(segment["start"])),
+                "end": seconds_to_hms(round(segment["end"])),
+                "duration_start": seconds_to_hms(round(segment["start"])),
+                "duration_end": seconds_to_hms(round(segment["end"])),
             }
             for segment in data["segments"]
         ]
@@ -185,6 +187,7 @@ def create_data_from_deck(deck, deck_number, movie_name):
 
 def process_movie(movie_name, data_path):
     raw_records = pd.read_excel(data_path)
+    print(raw_records)
     raw_records["start"] = raw_records["start"].apply(lambda x: hms_to_seconds(x))
     raw_records["end"] = raw_records["end"].apply(lambda x: hms_to_seconds(x))
     raw_records["duration_start"] = raw_records["duration_start"].apply(lambda x: hms_to_seconds(x))
