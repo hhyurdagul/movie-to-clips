@@ -19,6 +19,7 @@ def seconds_to_hms(seconds):
 def hms_to_seconds(hms):
     if isinstance(hms, float):
         return float("nan")
+    hms = str(hms)
     hours, minutes, seconds = hms.split(":")
     return int(hours) * 3600 + int(minutes) * 60 + int(seconds)
 
@@ -187,7 +188,6 @@ def create_data_from_deck(deck, deck_number, movie_name):
 
 def process_movie(movie_name, data_path):
     raw_records = pd.read_excel(data_path)
-    print(raw_records)
     raw_records["start"] = raw_records["start"].apply(lambda x: hms_to_seconds(x))
     raw_records["end"] = raw_records["end"].apply(lambda x: hms_to_seconds(x))
     raw_records["duration_start"] = raw_records["duration_start"].apply(lambda x: hms_to_seconds(x))
